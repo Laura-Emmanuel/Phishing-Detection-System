@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Phishing Detection System</title>
+  <style>
+    :root {
+      --bg: #f2f5f7;
+      --panel: #ffffff;
+      --panel-soft: #f8fafc;
+      --ink: #172033;
+      --muted: #667085;
+      --line: #d9e1ea;
+      --blue: #155eef;
+      --blue-dark: #173b7a;
+      --teal: #0f766e;
+      --violet: #6d3fc8;
+      --safe: #177245;
+      --safe-bg: #e8f7ef;
+      --danger: #b42318;
+      --danger-bg: #fff0ed;
+      --warn: #b54708;
+      --warn-bg: #fff7e6;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Arial, sans-serif;
+      color: var(--ink);
+      background: var(--bg);
+    }
+
+    .topbar {
+      background:
+        linear-gradient(135deg, rgba(21, 94, 239, 0.92), rgba(15, 118, 110, 0.88)),
+        url("https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=1800&q=80");
+      background-size: cover;
+      background-position: center;
+      color: #ffffff;
+    }
+
+    .topbar-inner {
+      max-width: 1180px;
+      margin: 0 auto;
+      min-height: 260px;
+      padding: 34px 24px;
+      display: flex;
+      justify-content: space-between;
+      gap: 24px;
+      align-items: flex-end;
+    }
+
+    .hero-copy {
+      max-width: 720px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 44px;
+      line-height: 1.2;
+      letter-spacing: 0;
+    }
+
+    .subtitle {
+      margin: 6px 0 0;
+      max-width: 680px;
+      color: #eef6ff;
+      line-height: 1.5;
+      font-size: 17px;
+    }
+
+    .status-pill {
+      min-width: 170px;
+      padding: 10px 14px;
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      border-radius: 6px;
+      text-align: center;
+      color: #dff7ef;
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .shell {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 26px 24px 44px;
+    }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+
+    .metric,
+    .panel,
+    .result-panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: 0 12px 26px rgba(16, 24, 40, 0.08);
+    }
+
+    .metric {
+      padding: 16px;
+    }
+
+    .metric strong {
+      display: block;
+      font-size: 24px;
+      color: var(--blue-dark);
+      margin-bottom: 4px;
+    }
+
+    .metric span {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: minmax(0, 1.08fr) minmax(360px, 0.92fr);
+      gap: 18px;
+      align-items: start;
+    }
+
+    .panel,
+    .result-panel,
+    .insight-panel {
+      padding: 22px;
+    }
+
+    h2 {
+      margin: 0 0 14px;
+      font-size: 20px;
+      line-height: 1.2;
+    }
+
+    .tabs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .tab,
+    .scan,
+    .sample {
+      border: 0;
+      border-radius: 6px;
+      cursor: pointer;
+      font: inherit;
+    }
+
+    .tab {
+      min-height: 44px;
+      color: var(--blue);
+      background: #e8f2fb;
+    }
+
+    .tab.active {
+      color: #ffffff;
+      background: var(--blue);
+    }
+
+    label {
+      display: block;
+      margin-top: 12px;
+      color: #344054;
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    input,
+    textarea,
+    select {
+      width: 100%;
+      margin-top: 7px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #ffffff;
+      color: var(--ink);
+      font: inherit;
+    }
+
+    textarea {
+      min-height: 170px;
+      resize: vertical;
+    }
+
+    .scan {
+      width: 100%;
+      min-height: 48px;
+      margin-top: 16px;
+      color: #ffffff;
+      background: linear-gradient(135deg, var(--blue), var(--teal));
+      font-weight: 700;
+    }
+
+    .samples {
+      margin-top: 18px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .sample {
+      min-height: 38px;
+      padding: 8px 10px;
+      color: #344054;
+      background: var(--panel-soft);
+      border: 1px solid var(--line);
+      text-align: left;
+      overflow-wrap: anywhere;
+    }
+
+    .sample-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .section-title {
+      margin: 18px 0 8px;
+      color: #344054;
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    .result-panel {
+      min-height: 430px;
+    }
+
+    .verdict-box {
+      padding: 18px;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: var(--panel-soft);
+    }
+
+    .verdict {
+      margin: 0 0 8px;
+      font-size: 28px;
+      font-weight: 800;
+      line-height: 1.15;
+    }
+
+    .legitimate .verdict { color: var(--safe); }
+    .phishing .verdict { color: var(--danger); }
+    .suspicious .verdict { color: var(--warn); }
+    .error .verdict { color: var(--warn); }
+
+    .legitimate { background: var(--safe-bg); border-color: #b7e4ca; }
+    .phishing { background: var(--danger-bg); border-color: #ffb8ad; }
+    .suspicious { background: var(--warn-bg); border-color: #ffd88a; }
+    .error { background: var(--warn-bg); border-color: #ffd88a; }
+
+    .result-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .result-item {
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #ffffff;
+    }
+
+    .result-item span {
+      display: block;
+      color: var(--muted);
+      font-size: 13px;
+      margin-bottom: 5px;
+    }
+
+    .result-item strong {
+      font-size: 16px;
+    }
+
+    .reasons {
+      margin-top: 16px;
+      padding-left: 18px;
+      color: #344054;
+      line-height: 1.6;
+    }
+
+    .model-lines {
+      margin-top: 16px;
+      color: var(--muted);
+      line-height: 1.6;
+      font-size: 14px;
+    }
+
+    .detail-block {
+      margin-top: 16px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #ffffff;
+    }
+
+    .detail-block strong {
+      display: block;
+      margin-bottom: 8px;
+      color: #344054;
+    }
+
+    .insights {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      margin-top: 18px;
+    }
+
+    .insight-panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: 0 12px 26px rgba(16, 24, 40, 0.08);
+    }
+
+    .signal-list {
+      display: grid;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .signal {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      padding: 12px;
+      border-radius: 8px;
+      background: var(--panel-soft);
+      border: 1px solid var(--line);
+    }
+
+    .signal-mark {
+      width: 12px;
+      height: 12px;
+      margin-top: 4px;
+      border-radius: 50%;
+      background: var(--violet);
+      flex: 0 0 auto;
+    }
+
+    .signal strong {
+      display: block;
+      margin-bottom: 3px;
+      font-size: 14px;
+    }
+
+    .signal span {
+      color: var(--muted);
+      line-height: 1.45;
+      font-size: 14px;
+    }
+
+    .algorithm-strip {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .algorithm-card {
+      padding: 14px;
+      border-radius: 8px;
+      background: #f7fbff;
+      border: 1px solid #cfe2ff;
+    }
+
+    .algorithm-card strong {
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    .algorithm-card span {
+      color: var(--muted);
+      line-height: 1.45;
+      font-size: 14px;
+    }
+
+    @media (max-width: 880px) {
+      .topbar-inner,
+      .workspace {
+        grid-template-columns: 1fr;
+        display: grid;
+      }
+
+      .metrics {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .insights {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .topbar-inner,
+      .shell {
+        padding-left: 14px;
+        padding-right: 14px;
+      }
+
+      .metrics,
+      .result-grid,
+      .sample-grid,
+      .algorithm-strip {
+        grid-template-columns: 1fr;
+      }
+
+      h1 {
+        font-size: 30px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="hero-copy">
+        <h1>AI Phishing Detection System</h1>
+        <p class="subtitle">Check suspicious URLs and emails with Random Forest, Logistic Regression, and strict live URL risk checks tuned to catch phishing indicators.</p>
+      </div>
+      <div class="status-pill">Detection engine ready</div>
+    </div>
+  </header>
+
+  <main class="shell">
+    <section class="metrics">
+      <div class="metric"><strong>2</strong><span>active algorithms</span></div>
+      <div class="metric"><strong>100</strong><span>maximum risk score</span></div>
+      <div class="metric"><strong>Live</strong><span>URL rule verification</span></div>
+    </section>
+
+    <section class="workspace">
+      <div class="panel">
+        <h2>Scanner</h2>
+        <div class="tabs">
+          <button class="tab active" type="button" onclick="showTab('url')">Check URL</button>
+          <button class="tab" type="button" onclick="showTab('email')">Check Email</button>
+        </div>
+
+        <section id="url-tab">
+          <label for="url-input">URL</label>
+          <input type="text" id="url-input" placeholder="http://paypal-login.update-account.net/secure/verify">
+
+          <label for="algorithm-input">Algorithm</label>
+          <select id="algorithm-input">
+            <option value="random_forest">Random Forest</option>
+            <option value="logistic_regression">Logistic Regression</option>
+          </select>
+
+          <button class="scan" type="button" onclick="checkUrl()">Scan URL</button>
+
+          <div class="samples">
+            <div class="section-title">Try a sample</div>
+            <div class="sample-grid">
+              <button class="sample" type="button" onclick="useSample('http://paypal-login.update-account.net/secure/verify?token=abc')">paypal-login.update-account.net</button>
+              <button class="sample" type="button" onclick="useSample('http://192.168.1.1/secure/banking/login')">IP banking login</button>
+              <button class="sample" type="button" onclick="useSample('http://amazon-account-update.xyz/login')">amazon-account-update.xyz</button>
+              <button class="sample" type="button" onclick="useSample('https://www.google.com')">google.com</button>
+            </div>
+          </div>
+        </section>
+
+        <section id="email-tab" style="display: none;">
+          <label for="subject-input">Subject</label>
+          <input type="text" id="subject-input" placeholder="URGENT: Account Alert" value="Sister">
+
+          <label for="sender-input">Sender</label>
+          <input type="text" id="sender-input" placeholder="support@example.com" value="support@gmail.com">
+
+          <label for="email-algorithm-input">Algorithm</label>
+          <select id="email-algorithm-input">
+            <option value="random_forest">Random Forest</option>
+            <option value="logistic_regression">Logistic Regression</option>
+          </select>
+
+          <label for="email-input">Email body</label>
+          <textarea id="email-input" placeholder="Paste email body here" value="Hey, its your baby sister."></textarea>
+
+          <button class="scan" type="button" onclick="checkEmail()">Scan Email</button>
+        </section>
+      </div>
+
+      <aside class="result-panel">
+        <h2>Result</h2>
+        <div id="verdict-box" class="verdict-box">
+          <p class="verdict" id="verdict-text">Awaiting scan</p>
+          <span id="result-summary">Paste a URL or email to begin.</span>
+        </div>
+
+        <div class="result-grid">
+          <div class="result-item"><span>Prediction</span><strong id="prediction">-</strong></div>
+          <div class="result-item"><span>Confidence</span><strong id="confidence">-</strong></div>
+          <div class="result-item"><span>Confidence Band</span><strong id="confidence-band">-</strong></div>
+          <div class="result-item"><span>Risk Level</span><strong id="risk">-</strong></div>
+          <div class="result-item"><span>Algorithm</span><strong id="algorithm">-</strong></div>
+          <div class="result-item"><span>Risk Score</span><strong id="risk-score">-</strong></div>
+        </div>
+
+        <ul class="reasons" id="reason-list"></ul>
+        <div class="model-lines" id="model-details"></div>
+      </aside>
+    </section>
+
+    <section class="insights">
+      <div class="insight-panel">
+        <h2>Detection Signals</h2>
+        <div class="signal-list">
+          <div class="signal"><span class="signal-mark"></span><div><strong>Brand impersonation</strong><span>Flags fake domains that mention trusted names outside their official domains.</span></div></div>
+          <div class="signal"><span class="signal-mark"></span><div><strong>Credential traps</strong><span>Looks for login, verify, password, billing, recovery, and account wording in risky places.</span></div></div>
+          <div class="signal"><span class="signal-mark"></span><div><strong>URL structure</strong><span>Checks IP-based links, extra redirects, deep paths, query strings, subdomains, hyphens, and risky TLDs.</span></div></div>
+          <div class="signal"><span class="signal-mark"></span><div><strong>Email sender validation</strong><span>Checks sender format, domain mismatch, free-mail senders, and brand impersonation.</span></div></div>
+          <div class="signal"><span class="signal-mark"></span><div><strong>Sensitive information requests</strong><span>Flags password, OTP, payment, banking, card, and recovery phrase requests.</span></div></div>
+          <div class="signal"><span class="signal-mark"></span><div><strong>Email link inspection</strong><span>Extracts URLs inside messages and runs the phishing URL checks against them.</span></div></div>
+        </div>
+      </div>
+
+      <div class="insight-panel">
+        <h2>Algorithms In Use</h2>
+        <div class="algorithm-strip">
+          <div class="algorithm-card"><strong>Random Forest</strong><span>Primary model for structured website features.</span></div>
+          <div class="algorithm-card"><strong>Logistic Regression</strong><span>Alternative model for comparison and simpler scoring.</span></div>
+        </div>
+        <div class="signal-list">
+          <div class="signal"><span class="signal-mark"></span><div><strong>No extra classifiers</strong><span>The app filters saved artifacts so only these two algorithms are exposed.</span></div></div>
+          <div class="signal"><span class="signal-mark"></span><div><strong>Strict final verdict</strong><span>High risk URL evidence can override an uncertain legitimate model vote.</span></div></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    function escapeHtml(value) {
+      return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function showTab(tab) {
+      document.getElementById("url-tab").style.display = tab === "url" ? "block" : "none";
+      document.getElementById("email-tab").style.display = tab === "email" ? "block" : "none";
+      document.querySelectorAll(".tab").forEach((button, index) => {
+        button.classList.toggle("active", (index === 0 && tab === "url") || (index === 1 && tab === "email"));
+      });
+      resetResult();
+    }
+
+    function useSample(url) {
+      document.getElementById("url-input").value = url;
+      showTab("url");
+    }
+
+    function setBlankResult(message) {
+      document.getElementById("verdict-box").className = "verdict-box error";
+      document.getElementById("verdict-text").innerText = message;
+      document.getElementById("result-summary").innerText = "";
+      document.getElementById("prediction").innerText = "-";
+      document.getElementById("confidence").innerText = "-";
+      document.getElementById("confidence-band").innerText = "-";
+      document.getElementById("risk").innerText = "-";
+      document.getElementById("algorithm").innerText = "-";
+      document.getElementById("risk-score").innerText = "-";
+      document.getElementById("reason-list").innerHTML = "";
+      document.getElementById("model-details").innerHTML = "";
+    }
+
+    function resetResult() {
+      document.getElementById("verdict-box").className = "verdict-box";
+      document.getElementById("verdict-text").innerText = "Awaiting scan";
+      document.getElementById("result-summary").innerText = "Paste a URL or email to begin.";
+      document.getElementById("prediction").innerText = "-";
+      document.getElementById("confidence").innerText = "-";
+      document.getElementById("confidence-band").innerText = "-";
+      document.getElementById("risk").innerText = "-";
+      document.getElementById("algorithm").innerText = "-";
+      document.getElementById("risk-score").innerText = "-";
+      document.getElementById("reason-list").innerHTML = "";
+      document.getElementById("model-details").innerHTML = "";
+    }
+
+    function showResult(data) {
+      if (data.error) {
+        setBlankResult(data.error);
+        return;
+      }
+
+      const isPhishing = data.prediction === "PHISHING";
+      const isSuspicious = data.prediction === "SUSPICIOUS";
+      document.getElementById("verdict-box").className = "verdict-box " + (isPhishing ? "phishing" : isSuspicious ? "suspicious" : "legitimate");
+      document.getElementById("verdict-text").innerText = isPhishing ? "PHISHING DETECTED" : isSuspicious ? "TREAT WITH CAUTION" : "LEGITIMATE";
+      document.getElementById("result-summary").innerText = data.registered_domain
+        ? "Domain checked: " + data.registered_domain
+        : data.sender_validation && data.sender_validation.domain
+          ? "Sender checked: " + data.sender_validation.domain
+          : "Scan complete.";
+      document.getElementById("prediction").innerText = data.prediction || "-";
+      document.getElementById("confidence").innerText = data.confidence || "-";
+      document.getElementById("confidence-band").innerText = data.confidence_band || "-";
+      document.getElementById("risk").innerText = data.risk_level || "-";
+      document.getElementById("algorithm").innerText = data.algorithm || "-";
+      document.getElementById("risk-score").innerText = data.risk_score !== undefined ? data.risk_score + "/100" : "-";
+      const reasons = data.reasons && data.reasons.length ? data.reasons : ["No major warning signs were found, but unexpected requests should still be verified."];
+      document.getElementById("reason-list").innerHTML = reasons.map((reason) => `<li>${escapeHtml(reason)}</li>`).join("");
+
+      const modelDetails = data.model_outputs
+        ? `<div class="detail-block"><strong>Model comparison</strong>${Object.entries(data.model_outputs).map(([name, output]) => `${escapeHtml(name)}: ${escapeHtml(output.prediction)} (${escapeHtml(output.confidence)})`).join("<br>")}</div>`
+        : "";
+      const senderDetails = data.sender_validation
+        ? `<div class="detail-block"><strong>Sender validation</strong>Email: ${escapeHtml(data.sender_validation.email || "not valid")}<br>Domain: ${escapeHtml(data.sender_validation.domain || "not available")}<br>Status: ${data.sender_validation.is_suspicious ? "Needs review" : "No sender mismatch detected"}</div>`
+        : "";
+      const urlDetails = data.detected_urls && data.detected_urls.length
+        ? `<div class="detail-block"><strong>URLs found in email</strong>${data.detected_urls.map((item) => `${escapeHtml(item.url)} - risk ${escapeHtml(item.score)}/100`).join("<br>")}</div>`
+        : "";
+      document.getElementById("model-details").innerHTML = modelDetails + senderDetails + urlDetails;
+    }
+
+    async function postJson(url, payload) {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+      showResult(await response.json());
+    }
+
+    function checkUrl() {
+      postJson("/predict_url", {
+        url: document.getElementById("url-input").value,
+        algorithm: document.getElementById("algorithm-input").value
+      });
+    }
+
+    function checkEmail() {
+      postJson("/predict_email", {
+        body: document.getElementById("email-input").value,
+        subject: document.getElementById("subject-input").value,
+        sender: document.getElementById("sender-input").value,
+        algorithm: document.getElementById("email-algorithm-input").value
+      });
+    }
+  </script>
+</body>
+</html>
